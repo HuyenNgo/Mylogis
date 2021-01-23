@@ -12,7 +12,7 @@ export class BillEntry extends React.Component {
         super(props)
         this.state = {
             form: {
-                status: '',
+                status: 1,
                 fromDate: new Date(),
                 toDate: new Date(),
                 gender: 'male'
@@ -63,9 +63,9 @@ export class BillEntry extends React.Component {
                 reqBody,
                 data => {
                     console.log(data.datas)
-                    let suggestions = [...data.datas]
+                    let supData = [...data.datas]
                     notifier.hideWaiting()
-                    this.props.history.push('/bill-supplier', { billEntryInfo: this.state.form, isFullInfo: true, suggestions: suggestions })
+                    this.props.history.push('/bill-supplier', { billEntryInfo: { ...this.state.form }, isFullInfo: true, supData: supData })
                 }
             )
 
@@ -117,12 +117,6 @@ export class BillEntry extends React.Component {
             form: { ...this.state.form, status: newValue ? newValue.value : undefined }
         });
 
-    };
-
-    onSelectGenderChanged = (newValue, actionMeta) => {
-        this.setState({
-            form: { ...this.state.form, gender: newValue ? newValue.value : '' }
-        });
     };
 
     onSelectProvinceIdSenderChanged = (newValue) => {
@@ -228,9 +222,13 @@ export class BillEntry extends React.Component {
 
 
     mockData = () => {
+        let userClaims = JSON.parse(localStorage.getItem("User"))
+        if (!userClaims) throw Error("no user found")
+
         this.setState({
             form: {
                 ...this.state.form,
+                cusID: userClaims.id,
                 wardIdSender: 27211,
                 districtIdSender: 772,
                 provinceIdSender: 79,
@@ -299,7 +297,7 @@ export class BillEntry extends React.Component {
                         </nav>
 
                         {/* Bill info */}
-                        <div className="row">
+                        {/* <div className="row">
                             <div className="col-md-6">
                                 <h5 className="headingContentTitle--themeColor linetop-space">Thông tin người gửi</h5>
                                 <div className="row">
@@ -356,7 +354,7 @@ export class BillEntry extends React.Component {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
 
                         <div className="row">

@@ -12,7 +12,6 @@ export default class Sidebar extends React.Component {
   componentDidMount = () => {
     $("#menuList").on("click", "a", function (e) {
       let parent = $(this).parent();
-      console.log(parent)
       parent.addClass("selected").siblings().removeClass("selected");
     })
   }
@@ -22,9 +21,44 @@ export default class Sidebar extends React.Component {
     this.props.children.props.history.push("/")
   }
 
+  renderCompanyFunctions = () => {
+    return (
+      <ul id="menuList">
+        <li>
+          <NavLink to="/bill" >
+            <span className="material-icons">local_shipping</span>
+            <span>Quản lý đơn hàng</span></NavLink>
+        </li>
+      </ul>
+    )
+  }
 
+
+  renderUserFunctions = () => {
+    return (
+      <ul id="menuList">
+        <li>
+          <NavLink to="/bill" >
+            <span className="material-icons">local_shipping</span>
+            <span>Quản lý đơn hàng</span></NavLink>
+        </li>
+        <li>
+          <NavLink to="/bill-entry" >
+            <span className="material-icons">receipt</span>
+            <span>Lập đơn hàng</span></NavLink>
+        </li>
+      </ul>
+    )
+  }
+
+  getUserClaims() {
+    const userClaims = JSON.parse(localStorage.getItem("User"))
+    return { ...userClaims }
+  }
 
   render() {
+    const userClaims = this.getUserClaims()
+
     return (
       <div className="sidebar-container sidenav open" id="mySidenav">
         <Link to="/home" className="logo-section" alt="no-logo"></Link>
@@ -37,7 +71,8 @@ export default class Sidebar extends React.Component {
           </div>
           <div className="menu-section">
             <div>
-              <ul id="menuList">
+              {(userClaims.userType == 1) ? this.renderUserFunctions() : this.renderCompanyFunctions()}
+              {/* <ul id="menuList">
                 <li>
                   <NavLink to="/bill" >
                     <span className="material-icons">local_shipping</span>
@@ -48,7 +83,7 @@ export default class Sidebar extends React.Component {
                     <span className="material-icons">receipt</span>
                     <span>Lập đơn hàng</span></NavLink>
                 </li>
-              </ul>
+              </ul> */}
             </div>
 
           </div>

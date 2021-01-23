@@ -20,13 +20,13 @@ export default class Notifier {
         });
     }
 
-    static showSuccessMessage = (message) => {
-        swal({
-            title: "Thông tin!",
-            text: message,
-            icon: "error",
-        });
-    }
+    // static showSuccessMessage = (message) => {
+    //     swal({
+    //         title: "Thông tin!",
+    //         text: message,
+    //         icon: "error",
+    //     });
+    // }
 
     static showWaiting = () => {
         $("#waitingWrapper").removeClass("bg").addClass("bg")

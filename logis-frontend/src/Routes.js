@@ -8,7 +8,9 @@ import {
   Login as LoginView,
   Bill as BillView,
   BillEntry as BillEntryView,
-  BillSupplier as BillSupplierView
+  BillSupplier as BillSupplierView,
+  BillDelivery as BillDeliveryView,
+  BillSubmitResult as BillSubmitResultView
 } from './views'
 
 const Routes = props => {
@@ -52,6 +54,22 @@ const Routes = props => {
         exact
         layout={AdminLayout}
         path='/bill-supplier'
+        {...state}
+      />
+
+      <RouteWithLayout
+        component={BillDeliveryView}
+        exact
+        layout={AdminLayout}
+        path='/bill-delivery'
+        {...state}
+      />
+
+      <RouteWithLayout
+        component={BillSubmitResultView}
+        exact
+        layout={AdminLayout}
+        path='/bill-submit-result'
         {...state}
       />
 

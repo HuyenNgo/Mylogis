@@ -1,9 +1,10 @@
 import React, { useCallback, useState } from 'react'
 import { Button } from '@material-ui/core';
-import {notifier} from './../../helpers'
+import { notifier } from './../../helpers'
 import { useHistory } from 'react-router-dom';
 
 import { loginProxy } from '../../api'
+import { readyException } from 'jquery';
 
 export default class Login extends React.Component {
 
@@ -11,11 +12,11 @@ export default class Login extends React.Component {
         super(props)
         this.state = {
             form: {
-                userName: "nghiacrom1",
+                userName: "nghiacrom",
                 password: "123456"
             }
         }
-        
+
     }
 
     updateField = (e) => {
@@ -40,8 +41,14 @@ export default class Login extends React.Component {
 
         let scope = this
         loginProxy(this.state.form,
-            data => {                
-                localStorage.setItem("User",JSON.stringify(data.data))
+            data => {
+                let userClaims = data.data
+                if (!userClaims) {
+                    notifier.showErrorMessage("Không tìm thấy thông tin người dùng")
+                    return
+                }
+                localStorage.setItem("User", JSON.stringify(userClaims))
+                console.log(data.data)
                 scope.navigateToHome()
             },
             err => {

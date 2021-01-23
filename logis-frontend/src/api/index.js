@@ -5,7 +5,7 @@ import { notifier } from '../helpers'
 
 
 
-const remoteApiUrl = 'http://52.168.24.38:9911'
+const remoteApiUrl = 'http://104.45.196.189:9911'
 
 export const getAllProvinceProxy = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
     const fullUrl = remoteApiUrl + `/address/get-all-province`
@@ -50,6 +50,12 @@ export const getAllOrderProxy = (queryObject, successCallbackFn = undefined, err
 }
 
 
+export const updateOrder = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
+    const fullUrl = remoteApiUrl + `/trans/update-status-order?orderId=${queryObject.orderId}&rulrateId=${queryObject.rulrateId}&status=${queryObject.status}`
+    axios.get(fullUrl)
+        .then(res => _handleResultStatus(res, successCallbackFn))
+        .catch(error => _handleError(error, errorCallbackFn));
+}
 
 const _handleResultStatus = (res, callbackFn = undefined) => {
     if (res.status == 200) {

@@ -673,3 +673,25 @@ a.hideLink {
 .whiteColor {
     color: white;
 }
+
+.blackColor {
+    color: black
+}
+
+.btn-edit{
+    background-color: transparent;
+}
+.btn-edit i{
+    color: #0f70d7;
+}
+
+.btn-view{
+    background-color: transparent;
+}
+.btn-view i{
+    color: #0f70d7;
+}
+
+.d-none{
+    display: none;
+}
