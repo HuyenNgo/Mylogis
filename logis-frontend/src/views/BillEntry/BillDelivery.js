@@ -1,13 +1,11 @@
-import React, { createRef } from 'react'
+import React from 'react'
 import { Topbar } from './../../components'
 import Select from 'react-select'
-import DatePicker from "react-datepicker"
-import { FormatHelper, DataOptions } from './../../common'
-import createHistory from 'history/createBrowserHistory'
-import NumberFormat from 'react-number-format';
+import { DataOptions } from './../../common'
 import { Link } from "react-router-dom";
 import $ from 'jquery'
 import { notifier } from './../../helpers'
+import { createOrderProxy } from './../../api'
 export class BillDelivery extends React.Component {
 
     constructor(props) {
@@ -36,18 +34,8 @@ export class BillDelivery extends React.Component {
 
     getInvalidMessage = () => {
         let errMessage = ''
-        return ''
 
         let isValid = $("#formInput")[0].checkValidity()
-
-        // if(isValid){
-        //     for(let i=2; i<=10;i++){
-        //         if(!$(`#react-select-${i}-input"`).value){
-        //             isValid = false
-        //             break;
-        //         }
-        //     }
-        // }       
 
         if (!isValid) {
             errMessage = 'Form không hợp lệ'
@@ -67,18 +55,18 @@ export class BillDelivery extends React.Component {
 
         notifier.showWaiting()
         setTimeout(() => {
-
+            let queryObject = { ...this.state.form }
             notifier.hideWaiting()
-            this.props.history.push('/bill-submit-result', { submitResult: { message: 'Lập đơn thành công' } })
-            // this.setState({
-            //     form: {
-            //         ...this.state.form
-            //     }
-            // }, () => {
-            //     const reqBody = { ... this.state.form }
-
-            // })
-        })
+            createOrderProxy(queryObject, res => {
+                console.log(res)
+                if (res.returnCode === 1) {
+                    notifier.showSuccessMessage("Lập đơn thành công")
+                    this.props.history.push('/bill-submit-result', { submitResult: { message: 'Lập đơn thành công' } })
+                    return
+                }
+                notifier.showErrorMessage("Tạo đơn hàng không thành công")
+            })
+        }, 50)
     }
 
     componentDidMount() {
@@ -142,7 +130,7 @@ export class BillDelivery extends React.Component {
                                 <div className="row">
                                     <div className="col-md-4 form-group required">
                                         <label className="filter-label">Họ tên</label>
-                                        <input className="form-control" name="SenderName" onChange={this.updateField} required />
+                                        <input className="form-control" name="senderName" onChange={this.updateField} required />
                                     </div>
                                     <div className="col-md-4 form-group required">
                                         <label className="filter-label">Giới tính</label>
@@ -156,11 +144,11 @@ export class BillDelivery extends React.Component {
                                     </div>
                                     <div className="col-md-4 form-group required">
                                         <label className="filter-label">SDT</label>
-                                        <input className="form-control" name="PhoneSender" type="text" onChange={this.updateField} required />
+                                        <input className="form-control" name="senderPhone" type="text" onChange={this.updateField} required />
                                     </div>
                                     <div className="col-md-12 form-group required">
                                         <label className="filter-label">Địa chỉ</label>
-                                        <textarea className="form-control" name="AddressSender" required></textarea>
+                                        <textarea className="form-control" name="senderAddress" onChange={this.updateField} required></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -189,7 +177,7 @@ export class BillDelivery extends React.Component {
                                     </div>
                                     <div className="col-md-12 form-group required">
                                         <label className="filter-label">Địa chỉ</label>
-                                        <textarea className="form-control" name="locDescriptionReceiver" onChange={this.updateField} required></textarea>
+                                        <textarea className="form-control" name="recieveAddress" onChange={this.updateField} required></textarea>
                                     </div>
                                 </div>
                             </div>

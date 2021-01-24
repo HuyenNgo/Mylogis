@@ -2,11 +2,11 @@ import React from 'react'
 import { Topbar, ToolbarButton } from './../../components'
 import Select from 'react-select'
 import DatePicker from "react-datepicker"
-import { StylessHelper, FormatHelper } from './../../common'
+import { StylessHelper, FormatHelper, DataOptions } from './../../common'
 import Pagination from '@material-ui/lab/Pagination';
 import { PagingListModel } from './../../models'
 import { PagingHelper } from './../../helpers/pagingHelper'
-import { getAllOrderProxy, updateOrder } from './../../api'
+import { getAllOrderProxy, updateOrderProxy } from './../../api'
 import BillEditModal from './../shared/BillModal/BillEditModal'
 import notifier from './../../helpers/notifier'
 import NumberFormat from 'react-number-format';
@@ -23,42 +23,49 @@ export default class Bill extends React.Component {
             orderList: [],
             pagingListModel: new PagingListModel(),
             showModal: false,
-            editItem: {}
+            editItem: {},
+            editRule: "BYCUSTOMER"
         }
-        console.log(this)
+
     }
 
     componentDidMount() {
         const userClaims = JSON.parse(localStorage.getItem("User"))
-        let queyObject = { cusID: userClaims.id }
-        getAllOrderProxy(queyObject, res => {
-            let fillData = [...res.datas?.map((item, index) => {
-                return {
-                    orderID: `A${index}`,
-                    receiver: `${item.receiverName} - ${item.receiverPhone}`,
-                    status: item.status,
-                    totalAmount: item.totalAmount,
-                    deliveryDate: item.createdDate,
-                    statusMessage: item.statusMessage
-                }
-            })]
+        if (userClaims.userType == 2) {
+            this.setState({ editRule: "BYCOMPANY" })
+        }
 
+        this.reloadFetchData()
+    }
+
+    reloadFetchData = () => {
+        const userClaims = JSON.parse(localStorage.getItem("User"))
+        let queyObject = {
+            cusID: userClaims.id,
+            queryType: "BYCUSTOMER"
+        }
+
+        if (userClaims.userType == 2) {
+            queyObject.queryType = "BYCOMPANY"
+        }
+
+        getAllOrderProxy(queyObject, res => {
+            let data = res.data
+            console.log(data)
+            let fillData = []
+            for (let orderItem of data) {
+                let newItem = {
+                    ...orderItem.order,
+                    orderDetails: orderItem.orderDetails
+                }
+                console.log(newItem)
+                fillData.push(newItem)
+            }
             let model = PagingHelper.mapToPagingListModel(fillData)
-            console.log(res.datas)
 
             this.setState({ pagingListModel: model, orderList: fillData });
         })
     }
-
-    //variables
-    options = [
-        { value: 1, label: 'Mới' },
-        { value: 2, label: 'Đã xác nhận' },
-        { value: 3, label: 'Đang Vận Chuyển' },
-        { value: 4, label: 'Hoàn thành' },
-        { value: 5, label: 'Hủy bỏ' }
-    ]
-
 
     //events
     updateField = e => {
@@ -68,6 +75,18 @@ export default class Bill extends React.Component {
     };
 
     mockClick = () => { }
+
+    getDelliveryDate = (orderItem) => {
+        let date = orderItem.expectedDate
+        let label = " (Dự kiến)"
+        if (orderItem.recieveDate) {
+            date = orderItem.recieveDate
+            label = ""
+        }
+        let strDate = FormatHelper.getDateFormtString(date) + label
+        return strDate
+    }
+
     onSelectStatusChanged = (newValue, actionMeta) => {
         this.setState({
             form: { ... this.state.form, status: newValue ? newValue.value : '' }
@@ -80,6 +99,7 @@ export default class Bill extends React.Component {
         const { status, fromDate, toDate } = this.state.form
 
         let fillData = this.state.orderList.filter(item => {
+            if (item.createdDate && typeof (item.createdDate) == 'string') item.createdDate = new Date(item.createdDate)
             return ((!status || status && item.status == status) &&
                 (!fromDate || fromDate && item.createdDate && fromDate.getTime() <= item.createdDate.getTime()) &&
                 (!toDate || item.createdDate && toDate.getTime() >= item.createdDate.getTime())
@@ -95,6 +115,7 @@ export default class Bill extends React.Component {
     }
 
     onBillItemClick = (item) => {
+        if (item.status == 4) return
         this.setState({
             editItem: item
         }, () => {
@@ -103,18 +124,25 @@ export default class Bill extends React.Component {
     }
 
     onEditBillItemSubmit = (item) => {
-        notifier.showWaiting()
-        this.setShowModal(false)
-        setTimeout(() => {
-            notifier.hideWaiting()            
-            setTimeout(notifier.showSuccessMessage("Cập nhật thành công"), 50)
-        }, 500)
-        // const queryObj = {
-        //     orderId: item.status,
-        //     orderId: item.status,
-        //     orderId: item.status
-        // }
-        // updateOrder()
+        notifier.showConfirmation("Xác nhận cập nhật thông tin vận chuyển hàng", () => {
+            notifier.showWaiting()
+            this.setShowModal(false)
+
+            console.log(item)
+            const queryObj = item
+            setTimeout(() => {
+                updateOrderProxy(queryObj, res => {
+                    notifier.hideWaiting()
+                    if (res.returnCode === 1) {
+                        this.reloadFetchData()
+                        notifier.showSuccessMessage("Cập nhật thành công")
+                        return
+                    }
+                    notifier.showErrorMessage("Cập nhật không thành công")
+                })
+            }, 100)
+
+        })
     }
 
 
@@ -170,7 +198,7 @@ export default class Bill extends React.Component {
                                         isClearable={true}
                                         onChange={this.onSelectStatusChanged}
                                         placeholder={'Tất cả'}
-                                        options={this.options} />
+                                        options={DataOptions.billStatus} />
                                 </div>
                                 <div className="col-md-3 form-group">
                                     <label className="filter-label">Thời gian tạo đơn từ</label>
@@ -201,7 +229,7 @@ export default class Bill extends React.Component {
                             {this.state.pagingListModel.data.length == 0 ? this.renderNoResultFound() :
                                 <div className="tableContainer">
                                     <table className="table">
-                                        <caption>Tổng cộng: {this.state.pagingListModel.data.lenghth}</caption>
+                                        <caption>Tổng cộng: {this.state.pagingListModel.data.length}</caption>
                                         <thead>
                                             <tr>
                                                 <th scope="col">STT</th>
@@ -218,14 +246,18 @@ export default class Bill extends React.Component {
                                                 return (
                                                     <tr key={index}>
                                                         <th scope="row">{++index}</th>
-                                                        <td>{item.orderID}</td>
-                                                        <td>{item.receiver}</td>
+                                                        <td>HD{item.orderId}</td>
+                                                        <td>{item.receiverName}</td>
                                                         <td>{<NumberFormat value={item.totalAmount} displayType={'text'} thousandSeparator={true} />}</td>
-                                                        <td>{item.deliveryDate}</td>
-                                                        <td>{item.statusMessage}</td>
+                                                        <td>{this.getDelliveryDate(item)}</td>
+                                                        <td>{DataOptions.getBillStatusNameByValue(item.status)}</td>
                                                         <td>
                                                             {/* <button className="btn btn-view"><i className="fa fa-eye "></i></button> */}
-                                                            <button type="button" onClick={this.onBillItemClick.bind(this, item)} className="btn btn-edit"><i className="fa fa-edit"></i></button>
+                                                            {
+                                                                this.state.editRule == "BYCOMPANY" ?
+                                                                    <button type="button" disabled={item.status == 4 ? true : false} onClick={this.onBillItemClick.bind(this, item)} className="btn btn-edit"><i className="fa fa-edit"></i></button> :
+                                                                    <button type="button" onClick={this.onBillItemClick.bind(this, item)} className="btn btn-view"><i className="fa fa-eye"></i></button>
+                                                            }
                                                         </td>
                                                     </tr>
                                                 )
@@ -240,7 +272,7 @@ export default class Bill extends React.Component {
                     </div>
                 </div>
 
-                <BillEditModal showModal={this.state.showModal} setShowModal={this.setShowModal} editItem={this.state.editItem} onEdit={this.onEditBillItemSubmit} />
+                <BillEditModal showModal={this.state.showModal} setShowModal={this.setShowModal} editItem={this.state.editItem} onEdit={this.onEditBillItemSubmit} editRule={this.state.editRule} />
             </>
         )
     }

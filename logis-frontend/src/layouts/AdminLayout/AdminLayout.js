@@ -6,7 +6,7 @@ import $ from 'jquery'
 export default class AdminLayout extends React.Component {
   constructor(props) {
     super(props)
-    console.log(this)
+   
   }
 
   componentDidMount() {

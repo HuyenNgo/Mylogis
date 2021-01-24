@@ -13,7 +13,7 @@ export class BillEntry extends React.Component {
         this.state = {
             form: {
                 status: 1,
-                fromDate: new Date(),
+                expectedDate: new Date(),
                 toDate: new Date(),
                 gender: 'male'
             },
@@ -37,6 +37,7 @@ export class BillEntry extends React.Component {
 
 
         }
+        console.log(this)
 
     }
 
@@ -64,8 +65,28 @@ export class BillEntry extends React.Component {
                 data => {
                     console.log(data.datas)
                     let supData = [...data.datas]
+                    let sendObject = { ...this.state.form }
+
+                    if (supData.length > 0) {
+                        let bestpack = supData[0]
+                        sendObject.totalAmount = bestpack.totalAmount
+
+
+                        let sumTransitTime = 0.0
+                        bestpack.suggestionDetailDTOS.forEach(sug => {
+                            sumTransitTime += sug.transitTime
+                        });
+
+                        sumTransitTime = parseInt(sumTransitTime)
+                        if (sumTransitTime >= 2) {
+                            let d = new Date(sendObject.expectedDate.setDate(sendObject.expectedDate.getDate() + sumTransitTime))
+                            sendObject.expectedDate = FormatHelper.getDateFormtString(d) + ''
+                        } else {
+                            sendObject.expectedDate = FormatHelper.getDateFormtString(sendObject.expectedDate) + ''
+                        }
+                    }
                     notifier.hideWaiting()
-                    this.props.history.push('/bill-supplier', { billEntryInfo: { ...this.state.form }, isFullInfo: true, supData: supData })
+                    this.props.history.push('/bill-supplier', { billEntryInfo: sendObject, isFullInfo: true, supData: supData })
                 }
             )
 
@@ -112,6 +133,12 @@ export class BillEntry extends React.Component {
         });
     };
 
+    updateFieldNumber = (e) => {
+        this.setState({
+            form: { ...this.state.form, [e.target.name]: e.target.value ? parseInt(e.target.value) : 0 }
+        });
+    };
+
     onSelectStatusChanged = (newValue, actionMeta) => {
         this.setState({
             form: { ...this.state.form, status: newValue ? newValue.value : undefined }
@@ -124,9 +151,9 @@ export class BillEntry extends React.Component {
         this.setState({
             senderDistrictSelectOption: null,
             senderWardSelectOption: null,
-            senderDistricts: this.getDistricts(val),
+            senderDistricts: this.getDistricts(parseInt(val)),
             senderWards: this.getWards(undefined),
-            form: { ...this.state.form, provinceIdSender: val, districtIdSender: undefined, wardIdSender: undefined }
+            form: { ...this.state.form, provinceIdSender: parseInt(val), districtIdSender: undefined, wardIdSender: undefined }
 
         });
     }
@@ -136,7 +163,7 @@ export class BillEntry extends React.Component {
         this.setState({
             senderWardSelectOption: null,
             senderDistrictSelectOption: newValue,
-            form: { ...this.state.form, districtIdSender: val, wardIdSender: undefined },
+            form: { ...this.state.form, districtIdSender: parseInt(val), wardIdSender: undefined },
             senderWards: this.getWards(val)
         });
     }
@@ -145,7 +172,7 @@ export class BillEntry extends React.Component {
         const val = newValue ? newValue.value : undefined
         this.setState({
             senderWardSelectOption: newValue,
-            form: { ...this.state.form, wardIdSender: val }
+            form: { ...this.state.form, wardIdSender: parseInt(val) }
         });
     }
 
@@ -157,7 +184,7 @@ export class BillEntry extends React.Component {
             receiverWardSelectOption: null,
             receiverDistricts: this.getDistricts(val),
             receiverWards: this.getWards(undefined),
-            form: { ...this.state.form, provinceIdReceiver: val, districtIdReceiver: undefined, wardIdReceiver: undefined }
+            form: { ...this.state.form, provinceIdReceiver: parseInt(val), districtIdReceiver: undefined, wardIdReceiver: undefined }
 
         });
     }
@@ -167,8 +194,8 @@ export class BillEntry extends React.Component {
         this.setState({
             receiverWardSelectOption: null,
             receiverDistrictSelectOption: newValue,
-            form: { ...this.state.form, districtIdReceiver: val, wardIdReceiver: undefined },
-            receiverWards: this.getWards(val)
+            form: { ...this.state.form, districtIdReceiver: parseInt(val), wardIdReceiver: undefined },
+            receiverWards: this.getWards(parseInt(val))
         });
     }
 
@@ -176,7 +203,7 @@ export class BillEntry extends React.Component {
         const val = newValue ? newValue.value : undefined
         this.setState({
             receiverWardSelectOption: newValue,
-            form: { ...this.state.form, wardIdReceiver: val }
+            form: { ...this.state.form, wardIdReceiver: parseInt(val) }
         });
     }
 
@@ -444,7 +471,7 @@ export class BillEntry extends React.Component {
                                 <div className="row" >
                                     <div className="col-md-4 form-group required">
                                         <label className="filter-label">Khối lượng  hàng</label>
-                                        <input className="form-control" type="number" name="volumeProduct" onChange={this.updateField} required />
+                                        <input className="form-control" type="number" name="volumeProduct" onChange={this.updateFieldNumber} required />
                                     </div>
                                     <div className="col-md-4 form-group required">
                                         <label className="filter-label">Loại hàng</label>
@@ -467,17 +494,17 @@ export class BillEntry extends React.Component {
                             <div className="col-md-6">
                                 <h5 className="headingContentTitle--themeColor linetop-space">Thông tin giao hàng</h5>
                                 <div className="row" >
-                                    <div className="col-md-4 form-group required">
+                                    <div className="col-md-6 form-group required">
                                         <label className="filter-label">Thời gian dự kiến giao hàng</label>
                                         <DatePicker
                                             dateFormat={FormatHelper.dateFormat}
                                             className="form-control"
-                                            selected={this.state.form.fromDate}
-                                            onChange={date => this.setState({ form: { ...this.state.form, fromDate: date } })}
+                                            selected={this.state.form.expectedDate}
+                                            onChange={date => this.setState({ form: { ...this.state.form, expectedDate: date } })}
                                             required={true}
                                         />
                                     </div>
-                                    <div className="col-md-4 form-group required">
+                                    {/* <div className="col-md-4 form-group required">
                                         <label className="filter-label">Thời gian dự kiến nhận hàng</label>
                                         <DatePicker
                                             dateFormat={FormatHelper.dateFormat}
@@ -486,7 +513,7 @@ export class BillEntry extends React.Component {
                                             onChange={date => this.setState({ form: { ...this.state.form, toDate: date } })}
                                             required={true}
                                         />
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                         </div>

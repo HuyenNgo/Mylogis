@@ -58,6 +58,10 @@ export default class Sidebar extends React.Component {
 
   render() {
     const userClaims = this.getUserClaims()
+    let fullName = ''
+    if (userClaims && userClaims.fullName) {
+      fullName = userClaims.fullName
+    }
 
     return (
       <div className="sidebar-container sidenav open" id="mySidenav">
@@ -66,7 +70,7 @@ export default class Sidebar extends React.Component {
           <div className="profile-section">
             <div className="row">
               <img alt="./assets/images/no-avatar.png" src="./assets/images/no-avatar.png" className="circle-avatar col-md-4" />
-              <span className="col-md-8" id="sideProfileName">Huyền Ngô</span>
+              <span className="col-md-8" id="sideProfileName">{fullName}</span>
             </div>
           </div>
           <div className="menu-section">

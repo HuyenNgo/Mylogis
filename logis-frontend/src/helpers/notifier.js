@@ -1,11 +1,11 @@
-import swal from 'sweetalert'
+import Swal from 'sweetalert2'
 import $ from 'jquery'
 
 export default class Notifier {
     static current_effect = 'bounce'
 
     static showSuccessMessage = (message) => {
-        swal({
+        Swal.fire({
             title: "Thành công!",
             text: message,
             icon: "success",
@@ -13,20 +13,27 @@ export default class Notifier {
     }
 
     static showErrorMessage = (message) => {
-        swal({
+        Swal.fire({
             title: "Lỗi!",
             text: message,
             icon: "error",
         });
     }
 
-    // static showSuccessMessage = (message) => {
-    //     swal({
-    //         title: "Thông tin!",
-    //         text: message,
-    //         icon: "error",
-    //     });
-    // }
+    static showConfirmation = (message, successCallbackFn) => {
+        Swal.fire({
+            title: "Xác nhận!",
+            text: message,
+            icon: 'warning',
+            showDenyButton: true,
+            confirmButtonText: `Xác nhận lưu`,
+            denyButtonText: `Hủy bỏ`,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (successCallbackFn) successCallbackFn()
+            }
+        })
+    }
 
     static showWaiting = () => {
         $("#waitingWrapper").removeClass("bg").addClass("bg")
@@ -39,5 +46,5 @@ export default class Notifier {
     }
 
 
-   
+
 }

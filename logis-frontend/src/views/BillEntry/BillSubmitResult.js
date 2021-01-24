@@ -11,7 +11,7 @@ export class BillSubmitResult extends React.Component {
                 message: ''
             }
         }
-        console.log(this)
+       
     }
     componentDidMount() {
 

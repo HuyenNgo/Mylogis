@@ -592,7 +592,7 @@ a.hideLink {
 }
 
 .modal-section {
-    margin-top: 35px
+    margin-top: 20px;
 }
 
 .modal-section-top {
@@ -678,20 +678,24 @@ a.hideLink {
     color: black
 }
 
-.btn-edit{
+button.btn-edit {
     background-color: transparent;
-}
-.btn-edit i{
-    color: #0f70d7;
+    border-color: 1px #00467F solid !important;
 }
 
-.btn-view{
-    background-color: transparent;
-}
-.btn-view i{
-    color: #0f70d7;
+button.btn-edit i {
+    color: #00467F;
 }
 
-.d-none{
+button.btn-view {
+    background-color: transparent;
+    border-color: 1px #00467F solid !important;
+}
+
+button.btn-view i {
+    color: #00467F;
+}
+
+.d-none {
     display: none;
 }

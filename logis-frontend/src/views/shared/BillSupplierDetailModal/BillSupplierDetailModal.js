@@ -47,7 +47,7 @@ class BillSupplierDetailModal extends React.Component {
                     <Modal.Header closeButton>
                         <Modal.Title id="example-custom-modal-styling-title" className="">
                             Thông tin chi tiết nhà vận chuyển
-          </Modal.Title>
+                    </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         {sup.suggestionDetailDTOS.length == 0 ? <></> :

@@ -30,29 +30,39 @@ export const getAllWardProxy = (queryObject, successCallbackFn = undefined, erro
 
 export const loginProxy = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
     const fullUrl = remoteApiUrl + `/user/login`
-    axios.post(fullUrl,queryObject)
+    axios.post(fullUrl, queryObject)
         .then(res => _handleResultStatus(res, successCallbackFn))
         .catch(error => _handleError(error, errorCallbackFn));
 }
 
 export const getSuggestionsProxy = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
     const fullUrl = remoteApiUrl + `/trans/get-suggestions`
-    axios.post(fullUrl,queryObject)
+    axios.post(fullUrl, queryObject)
         .then(res => _handleResultStatus(res, successCallbackFn))
         .catch(error => _handleError(error, errorCallbackFn));
 }
 
 export const getAllOrderProxy = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
-    const fullUrl = remoteApiUrl + `/trans/orders?cusId=${queryObject.cusID}`
+    let fullUrl = remoteApiUrl + `/trans/orders-by-customerId?customerId=${queryObject.cusID}`
+    if (queryObject.queryType && queryObject.queryType == "BYCOMPANY") {
+        fullUrl = remoteApiUrl + `/trans/orders-by-companyId?companyId=${queryObject.cusID}`
+    }
     axios.get(fullUrl)
         .then(res => _handleResultStatus(res, successCallbackFn))
         .catch(error => _handleError(error, errorCallbackFn));
 }
 
 
-export const updateOrder = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
+export const updateOrderProxy = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
     const fullUrl = remoteApiUrl + `/trans/update-status-order?orderId=${queryObject.orderId}&rulrateId=${queryObject.rulrateId}&status=${queryObject.status}`
     axios.get(fullUrl)
+        .then(res => _handleResultStatus(res, successCallbackFn))
+        .catch(error => _handleError(error, errorCallbackFn));
+}
+
+export const createOrderProxy = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
+    const fullUrl = remoteApiUrl + `/trans/create-order`
+    axios.post(fullUrl, queryObject)
         .then(res => _handleResultStatus(res, successCallbackFn))
         .catch(error => _handleError(error, errorCallbackFn));
 }

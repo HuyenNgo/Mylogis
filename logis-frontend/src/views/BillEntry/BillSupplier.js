@@ -1,8 +1,6 @@
-import React, { createRef } from 'react'
+import React from 'react'
 import { Topbar } from './../../components'
 import { Link } from "react-router-dom";
-import PropTypes from 'prop-types'
-import createHistory from 'history/createBrowserHistory'
 import BillSupplierDetailModal from './../shared/BillSupplierDetailModal'
 import NumberFormat from 'react-number-format';
 import $ from 'jquery'
@@ -19,16 +17,8 @@ export class BillSupplier extends React.Component {
         }
     }
 
-    //events
-    // updateField = e => {
-    //     setState(
-    //         () => this.state.form[`${e.target.name}`] = e.target.value
-    //     );
-    // };
-
     onSelectSupplierItem = (e, item, index) => {
         e.preventDefault()
-        console.log(e)
         this.setState({
             selectedSupItem: item
         }, () => {
@@ -92,26 +82,24 @@ export class BillSupplier extends React.Component {
     strDateSpan = (packageItem) => {
         let totalTransitTime = 0.00
         for (let item of packageItem.suggestionDetailDTOS) {
-            totalTransitTime = totalTransitTime + item.transitTime ? item.transitTime : 0
+            totalTransitTime += (item.transitTime || 0.00)
         }
-        const floorTime = Math.floor(totalTransitTime)
+        // const floorTime = Math.floor(totalTransitTime)
         const ceilTime = Math.ceil(totalTransitTime)
 
-        if (floorTime == 0) return ceilTime.toString()
-        return `${floorTime} - ${ceilTime} `
+        return `~  ${parseInt(ceilTime) | 0} `
     }
 
     continueBillDelivery = (e) => {
         e.preventDefault()
 
-        let rr_ids = []
+        let rulrateIds = []
         this.state.supData[0].suggestionDetailDTOS.forEach(item => {
-            // let rr_idObj = { rr_id: item.rulRateId }
-            rr_ids.push(item.rulRateId)
+            rulrateIds.push(item.rulRateId)
         });
 
         this.setState({
-            form: { ...this.state.form, rr_id: rr_ids }
+            form: { ...this.state.form, rulrateIds: rulrateIds }
         }, () => {
             this.props.history.push('/bill-delivery', { billSupplierInfo: { ...this.state.form }, isFullSupplierInfo: true })
         })
