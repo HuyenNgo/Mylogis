@@ -1,8 +1,9 @@
-import React, { useCallback } from 'react'
+import React from 'react'
 import { Modal } from 'react-bootstrap'
 import NumberFormat from 'react-number-format';
 import { DataOptions } from './../../../common'
 import Select from 'react-select'
+import { Constants } from './../../../common/constants'
 
 class BillEditModal extends React.Component {
     constructor(props) {
@@ -41,6 +42,25 @@ class BillEditModal extends React.Component {
         })
     }
 
+    renderCompanyUpdateSection = (editItem, orderDetailItem, onEdit) => {
+        if (orderDetailItem.status === Constants.BillCompleted) return (<span>Trạng thái: <span className="appTheme bold">{DataOptions.getBillStatusNameByValue(orderDetailItem.status)}</span></span>)
+
+        return (
+            <div className="ml-auto col-md-2 col-sm-12 appTheme ">
+                <div className="form-group">
+                    <label className="filter-label">Trạng thái</label>
+                    <Select
+                        onChange={(newValue) => {
+                            this.onSelectOrderDetailItemChanged(orderDetailItem, newValue)
+                        }}
+                        defaultValue={DataOptions.billUpdatedStatus.find(option => option.value === orderDetailItem.status)}
+                        options={DataOptions.billUpdatedStatus} />
+
+                </div>
+                <button type="button" onClick={() => { onEdit(this.getSubmitItem(editItem.orderId, orderDetailItem)) }} className="btn btn-info w-100">Lưu</button>
+            </div>
+        )
+    }
 
     render() {
         const showModal = this.props.showModal
@@ -82,28 +102,18 @@ class BillEditModal extends React.Component {
                                                     <img className="supImg" src="https://cdn.nhanh.vn/cdn/store/26/artCT/22280/dich_vu_van_chuyen_ghn_express_1.png" alt="no-image"></img>
                                                     <h4 className="appTheme upc">{orderDetailItem.companyName}</h4>
                                                 </div>
-                                                <div className={`supInfoContainer col-md-${editRule == "BYCOMPANY" ? 3 : 5} col-sm-12 txt-center`}>
-                                                    <span>Ngày lấy hàng dự kiến: </span>
+                                                <div className={`supInfoContainer col-md-${editRule === "BYCOMPANY" ? 3 : 5} col-sm-12 txt-center`}>
+                                                    {editRule != "BYCOMPANY" ?
+                                                        (<span> Trạng thái: <span className="appTheme font-weight-bold">{DataOptions.getBillStatusNameByValue(orderDetailItem.status)}</span> </span>)
+                                                        : <></>}
                                                     <span>Thời gian vận chuyển: <span className="appTheme font-weight-bold">{orderDetailItem.transitTime} ngày</span></span>
                                                 </div>
                                                 <div className="supInfoContainer price-container col-md-4 col-sm-12 txt-center mb-2" >
                                                     <h5 className=" font-weight-bold">Giá vận chuyển: <span className="appTheme"><NumberFormat value={orderDetailItem.amount} displayType={'text'} thousandSeparator={true} />  VND</span></h5>
                                                     <span className="appTheme">Loại hình vận chuyển: {orderDetailItem?.container?.contName}</span>
                                                 </div>
-                                                {editRule == "BYCOMPANY" ? (
-                                                    <div className="ml-auto col-md-2 col-sm-12 appTheme ">
-                                                        <div className="form-group">
-                                                            <label className="filter-label">Trạng thái</label>
-                                                            <Select
-                                                                onChange={(newValue) => {
-                                                                    this.onSelectOrderDetailItemChanged(orderDetailItem, newValue)
-                                                                    console.log(orderDetailItem)
-                                                                }}
-                                                                defaultValue={DataOptions.billStatus.find(option => option.value === orderDetailItem.status)}
-                                                                options={DataOptions.billStatus} />
-                                                        </div>
-                                                        <button type="button" onClick={() => { onEdit(this.getSubmitItem(editItem.orderId, orderDetailItem)) }} className="btn btn-info w-100">Lưu</button>
-                                                    </div>) : <></>}
+                                                {editRule === "BYCOMPANY" ? (
+                                                    this.renderCompanyUpdateSection(editItem, orderDetailItem, onEdit)) : <> </>}
                                             </div>
                                         </div>
 
@@ -120,29 +130,30 @@ class BillEditModal extends React.Component {
                                             </div>
                                         </div>
 
-                                        {!orderDetailItem.surcharges ? <></> :
-                                            <div className="supItem col-md-12 modal-section">
-                                                <div className="supItem-body align-items-start fcol">
-                                                    <div className="d-flex flex-column">
-                                                        <h4 className="appTheme bold">Thông tin báo giá:</h4>
-                                                    </div>
-                                                    <div className="col-md-12 col-sm-12 mt-1">
-                                                        <table className="amtTable">
-                                                            <thead></thead>
-                                                            <tbody>
-                                                                {this.renderSurcharges(orderDetailItem.surcharges)}
-                                                                <tr>
-                                                                    <td colSpan="7"><hr /></td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td colSpan="6"><h5>Tổng phí:</h5></td>
-                                                                    <td><h5><NumberFormat value={this.sumCharges(orderDetailItem.surcharges)} displayType={'text'} thousandSeparator={true} /> VND</h5></td>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
+                                        {
+                                            !orderDetailItem.surcharges ? <></> :
+                                                <div className="supItem col-md-12 modal-section">
+                                                    <div className="supItem-body align-items-start fcol">
+                                                        <div className="d-flex flex-column">
+                                                            <h4 className="appTheme bold">Thông tin báo giá:</h4>
+                                                        </div>
+                                                        <div className="col-md-12 col-sm-12 mt-1">
+                                                            <table className="amtTable">
+                                                                <thead></thead>
+                                                                <tbody>
+                                                                    {this.renderSurcharges(orderDetailItem.surcharges)}
+                                                                    <tr>
+                                                                        <td colSpan="7"><hr /></td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td colSpan="6"><h5>Tổng phí:</h5></td>
+                                                                        <td><h5><NumberFormat value={this.sumCharges(orderDetailItem.surcharges)} displayType={'text'} thousandSeparator={true} /> VND</h5></td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
                                         }
                                     </div>
 

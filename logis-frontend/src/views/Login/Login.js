@@ -60,7 +60,7 @@ export default class Login extends React.Component {
     };
 
     navigateToHome() {
-        this.props.history.push('/home')
+        this.props.history.push('/bill')
     }
 
 

@@ -13,8 +13,8 @@ export class BillEntry extends React.Component {
         this.state = {
             form: {
                 status: 1,
+                typeProduct: '1',
                 expectedDate: new Date(),
-                toDate: new Date(),
                 gender: 'male'
             },
             _provinces: [],
@@ -34,17 +34,21 @@ export class BillEntry extends React.Component {
 
             receiverDistrictSelectOption: null,
             receiverWardSelectOption: null,
-
-
         }
         console.log(this)
-
+        this.provinceSenderSelectControl = React.createRef();
+        this.districtSenderSelectControl = React.createRef();
+        this.wardSenderSelectControl = React.createRef();
+        this.provinceRecieverSelectControl = React.createRef();
+        this.districtRecieverSelectControl = React.createRef();
+        this.wardRecieverSelectControl = React.createRef();
+        this.typeProductSelectControl = React.createRef();
     }
 
     options = [
-        { value: 'normal', label: 'Bình thương' },
-        { value: 'breakable', label: 'Dễ vỡ' },
-        { value: 'security', label: 'Bảo mật thông tin' }
+        { value: '1', label: 'Hàng bình thường' },
+        { value: '2', label: 'Hàng dễ vỡ' },
+        { value: '3', label: 'Loại hàng khác' }
     ]
 
 
@@ -222,7 +226,7 @@ export class BillEntry extends React.Component {
     // 
     getProvinces() {
         return [...this.state._provinces].map((x, key) => {
-            return { value: x.provinceId, label: x.provinceName }
+            return { value: parseInt(x.provinceId), label: x.provinceName }
         })
     }
 
@@ -232,48 +236,86 @@ export class BillEntry extends React.Component {
             d = d.filter(x => x.provinceId == provinceId)
         }
         d = d.map((x, key) => {
-            return { value: x.districtId, label: x.districtName }
+            return { value: parseInt(x.districtId), label: x.districtName }
         })
         return d
     }
 
     getWards(districtId) {
         let w = [...this.state._wards]
+        console.log(districtId)
         if (districtId) {
             w = w.filter(x => x.districtId == districtId)
         }
         return w.map((x, key) => {
-            return { value: x.wardId, label: x.wardName }
+            return { value: parseInt(x.wardId), label: x.wardName }
         })
     }
 
 
-    mockData = () => {
+    mockData = (billEntryInfo) => {
         let userClaims = JSON.parse(localStorage.getItem("User"))
         if (!userClaims) throw Error("no user found")
+
+
+
+        let inputData = {
+            wardIdSender: 27211,
+            districtIdSender: 772,
+            provinceIdSender: 79,
+            locDescriptionSender: "Chung cư quận 11",
+            wardIdReceiver: 27217,
+            districtIdReceiver: 772,
+            provinceIdReceiver: 79,
+            locDescriptionReceiver: "184 Lê Đại Hành",
+            volumeProduct: 1,
+            typeProduct: '1',
+            expectedDate: new Date()
+        }
+        if (billEntryInfo) inputData = { ...billEntryInfo }
 
         this.setState({
             form: {
                 ...this.state.form,
                 cusID: userClaims.id,
-                wardIdSender: 27211,
-                districtIdSender: 772,
-                provinceIdSender: 79,
-                locDescriptionSender: "Chung cư quận 11",
-                wardIdReceiver: 27217,
-                districtIdReceiver: 772,
-                provinceIdReceiver: 79,
-                locDescriptionReceiver: "184 Lê Đại Hành",
-                volumeProduct: 1,
-                routTransitTime: 1
-            }
+                wardIdSender: inputData.wardIdSender,
+                districtIdSender: inputData.districtIdSender,
+                provinceIdSender: inputData.provinceIdSender,
+                locDescriptionSender: inputData.locDescriptionSender,
+                wardIdReceiver: inputData.wardIdReceiver,
+                districtIdReceiver: inputData.districtIdReceiver,
+                provinceIdReceiver: inputData.provinceIdReceiver,
+                locDescriptionReceiver: inputData.locDescriptionReceiver,
+                volumeProduct: inputData.volumeProduct,
+                typeProduct: inputData.typeProduct,
+                description: inputData.description
+            },
+            senderDistrictSelectOption: this.state.senderDistricts.find(x => x.value == inputData.districtIdSender),
+            senderWardSelectOption: this.state.senderWards.find(x => x.value == inputData.wardIdSender),
+            senderDistricts: this.getDistricts(parseInt(inputData.provinceIdSender)),
+            senderWards: this.getWards(parseInt(inputData.districtIdSender)),
+            receiverDistrictSelectOption: this.state.receiverDistricts.find(x => x.value == inputData.districtIdReceiver),
+            receiverWardSelectOption: this.state.receiverWards.find(x => x.value == inputData.wardIdReceiver),
+            receiverDistricts: this.getDistricts(parseInt(inputData.provinceIdReceiver)),
+            receiverWards: this.getWards(parseInt(inputData.districtIdReceiver))
+        }, () => {
+            this.provinceSenderSelectControl.current.state.value = this.state.senderProvinces.find(x => x.value == this.state.form.provinceIdSender)
+            this.districtSenderSelectControl.current.state.value = this.state.senderDistricts.find(x => x.value == this.state.form.districtIdSender)
+            this.wardSenderSelectControl.current.state.value = this.state.senderWards.find(x => x.value == this.state.form.wardIdSender)
+            this.provinceRecieverSelectControl.current.state.value = this.state.receiverProvinces.find(x => x.value == this.state.form.provinceIdReceiver)
+            this.districtRecieverSelectControl.current.state.value = this.state.receiverDistricts.find(x => x.value == this.state.form.districtIdReceiver)
+            this.wardRecieverSelectControl.current.state.value = this.state.receiverWards.find(x => x.value == this.state.form.wardIdReceiver)
+
+            this.typeProductSelectControl.current.state.value = this.options.find(x => x.value == this.state.form.typeProduct)
+            this.forceUpdate()
         })
     }
 
     // get remote data
-    componentDidMount() {
+    async componentDidMount() {
+        notifier.showWaiting()
         let queryObject = {}
-        getAllProvinceProxy(queryObject,
+        const aTask = getAllProvinceProxy(queryObject,
             res => {
                 const data = res.datas
                 this.setState({ _provinces: data },
@@ -282,7 +324,7 @@ export class BillEntry extends React.Component {
                     })
             })
 
-        getAllDistrictProxy(queryObject,
+        const bTask = getAllDistrictProxy(queryObject,
             res => {
                 const data = res.datas
                 this.setState({ _districts: data },
@@ -291,7 +333,7 @@ export class BillEntry extends React.Component {
                     })
             })
 
-        getAllWardProxy(queryObject,
+        const cTask = getAllWardProxy(queryObject,
             res => {
                 const data = res.datas
                 this.setState({ _wards: data },
@@ -300,7 +342,18 @@ export class BillEntry extends React.Component {
                     })
             })
 
-        this.mockData()
+        console.log('====================================');
+        console.log(this.props.location.state?.billEntryInfo)
+        console.log('====================================');
+        await Promise.all([aTask, bTask, cTask]);
+        notifier.hideWaiting()
+
+        this.mockData(this.props.location.state?.billEntryInfo)
+
+        const history = this.props.history
+        let state = { ...history.location.state };
+        delete state.billEntryInfo;
+        history.replace({ ...history.location, state });
     }
 
     render() {
@@ -323,67 +376,6 @@ export class BillEntry extends React.Component {
                             </ol>
                         </nav>
 
-                        {/* Bill info */}
-                        {/* <div className="row">
-                            <div className="col-md-6">
-                                <h5 className="headingContentTitle--themeColor linetop-space">Thông tin người gửi</h5>
-                                <div className="row">
-                                    <div className="col-md-4 form-group required">
-                                        <label className="filter-label">Họ tên</label>
-                                        <input className="form-control" name="SenderName" onChange={this.updateField} required />
-                                    </div>
-                                    <div className="col-md-4 form-group required">
-                                        <label className="filter-label">Giới tính</label>
-                                        <Select
-                                            name="GenderSender"
-                                            defaultValue={DataOptions.genders[0]}
-                                            onChange={e => { this.updateSelectField(e, 'a2') }}
-                                            placeholder={'Chọn giới tính'}
-                                            options={DataOptions.genders}
-                                            required={true} />
-                                    </div>
-                                    <div className="col-md-4 form-group required">
-                                        <label className="filter-label">SDT</label>
-                                        <input className="form-control" name="PhoneSender" type="text" onChange={this.updateField} required />
-                                    </div>
-                                    <div className="col-md-12 form-group required">
-                                        <label className="filter-label">Địa chỉ</label>
-                                        <textarea className="form-control" name="AddressSender" required></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <div className="col-md-6">
-                                <h5 className="headingContentTitle--themeColor linetop-space">Thông tin người nhận</h5>
-                                <div className="row">
-                                    <div className="col-md-4 form-group required">
-                                        <label className="filter-label">Họ tên</label>
-                                        <input className="form-control" name="receiverName" onChange={this.updateField} />
-                                    </div>
-                                    <div className="col-md-4 form-group required">
-                                        <label className="filter-label">Giới tính</label>
-                                        <Select
-                                            name="GenderReceiver"
-                                            defaultValue={DataOptions.genders[0]}
-                                            onChange={e => { this.updateSelectField(e, 'a') }}
-                                            placeholder={'Chọn giới tính'}
-                                            options={DataOptions.genders}
-                                            required={true} />
-                                    </div>
-                                    <div className="col-md-4 form-group required">
-                                        <label className="filter-label">SDT</label>
-                                        <input className="form-control" name="receiverPhone" type="text" onChange={this.updateField} required />
-                                    </div>
-                                    <div className="col-md-12 form-group required">
-                                        <label className="filter-label">Địa chỉ</label>
-                                        <textarea className="form-control" name="locDescriptionReceiver" onChange={this.updateField} required></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> */}
-
-
                         <div className="row">
                             <div className="col-md-6">
                                 <h5 className="headingContentTitle--themeColor linetop-space">Điểm gom hàng</h5>
@@ -393,6 +385,7 @@ export class BillEntry extends React.Component {
                                         <Select
                                             name="provinceIdSender"
                                             onChange={this.onSelectProvinceIdSenderChanged}
+                                            ref={this.provinceSenderSelectControl}
                                             placeholder={'Tỉnh'}
                                             options={this.state.senderProvinces}
                                             required={true} />
@@ -403,6 +396,7 @@ export class BillEntry extends React.Component {
                                             name="districtIdSender"
                                             value={this.state.senderDistrictSelectOption}
                                             onChange={this.onSelectDistrictIdSenderChanged}
+                                            ref={this.districtSenderSelectControl}
                                             placeholder={'Quận/Huyện'}
                                             options={this.state.senderDistricts}
                                             required={true} />
@@ -413,13 +407,14 @@ export class BillEntry extends React.Component {
                                             name="wardIdSender"
                                             value={this.state.senderWardSelectOption}
                                             onChange={this.onSelectWardIdSenderChanged}
+                                            ref={this.wardSenderSelectControl}
                                             placeholder={'Phường/Xã'}
                                             options={this.state.senderWards}
                                             required={true} />
                                     </div>
                                     <div className="col-md-12 form-group required">
                                         <label className="filter-label">Nhập thông tin đường/ số nhà</label>
-                                        <textarea className="form-control" name="locDescriptionSender" onChange={this.updateField} required></textarea>
+                                        <textarea className="form-control" name="locDescriptionSender" value={this.state.form.locDescriptionSender} onChange={this.updateField} required></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -432,6 +427,7 @@ export class BillEntry extends React.Component {
                                         <Select
                                             name="provinceIdReceiver"
                                             onChange={this.onSelectProvinceIdReceiverChanged}
+                                            ref={this.provinceRecieverSelectControl}
                                             placeholder={'Tỉnh'}
                                             options={this.state.receiverProvinces}
                                             required={true} />
@@ -440,7 +436,9 @@ export class BillEntry extends React.Component {
                                         <label className="filter-label">Quận/Huyện</label>
                                         <Select
                                             name="districtIdReceiver"
+                                            defaultValue={this.state.receiverDistricts.find(option => option.value === this.state.form.districtIdReceiver)}
                                             value={this.state.receiverDistrictSelectOption}
+                                            ref={this.districtRecieverSelectControl}
                                             onChange={this.onSelectDistrictIdReceiverChanged}
                                             placeholder={'Quận/Huyện'}
                                             options={this.state.receiverDistricts}
@@ -451,6 +449,7 @@ export class BillEntry extends React.Component {
                                         <Select
                                             name="wardIdReceiver"
                                             value={this.state.receiverWardSelectOption}
+                                            ref={this.wardRecieverSelectControl}
                                             onChange={this.onSelectWardIdReceiverChanged}
                                             placeholder={'Phường/Xã'}
                                             options={this.state.receiverWards}
@@ -458,7 +457,7 @@ export class BillEntry extends React.Component {
                                     </div>
                                     <div className="col-md-12 form-group required">
                                         <label className="filter-label">Nhập thông tin đường/ số nhà</label>
-                                        <textarea className="form-control" name="locDescriptionReceiver" onChange={this.updateField} ></textarea>
+                                        <textarea className="form-control" name="locDescriptionReceiver" value={this.state.form.locDescriptionReceiver} onChange={this.updateField} ></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -471,21 +470,22 @@ export class BillEntry extends React.Component {
                                 <div className="row" >
                                     <div className="col-md-4 form-group required">
                                         <label className="filter-label">Khối lượng  hàng</label>
-                                        <input className="form-control" type="number" name="volumeProduct" onChange={this.updateFieldNumber} required />
+                                        <input className="form-control" type="number" name="volumeProduct" value={this.state.form.volumeProduct} onChange={this.updateFieldNumber} required />
                                     </div>
-                                    <div className="col-md-4 form-group required">
+                                    <div className="col-md-6 form-group required">
                                         <label className="filter-label">Loại hàng</label>
                                         <Select
                                             name="typeProduct"
                                             isClearable={true}
                                             onChange={e => { this.updateSelectField(e, 'typeProduct') }}
+                                            ref={this.typeProductSelectControl}
                                             placeholder={'Trống'}
                                             options={this.options}
                                             required={true} />
                                     </div>
-                                    <div className="col-md-8 form-group">
+                                    <div className="col-md-10 form-group">
                                         <label className="filter-label">Nội dung</label>
-                                        <textarea name="description" className="form-control" onChange={this.updateField}></textarea>
+                                        <textarea name="description" className="form-control" value={this.state.form.description} onChange={this.updateField}></textarea>
                                     </div>
                                 </div>
                             </div>

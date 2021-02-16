@@ -15,6 +15,7 @@ export class BillSupplier extends React.Component {
             showModal: false,
             selectedSupItem: {}
         }
+        console.log(this)
     }
 
     onSelectSupplierItem = (e, item, index) => {
@@ -106,6 +107,11 @@ export class BillSupplier extends React.Component {
 
     }
 
+    backToBillEntry = (e) => {
+        e.preventDefault()
+        this.props.history.push('/bill-entry', { billEntryInfo: { ...this.state.form } })
+    }
+
 
     // renderSupItem(item, index) {
 
@@ -185,7 +191,7 @@ export class BillSupplier extends React.Component {
                         {/* Breadcumb */}
                         <nav aria-label="breadcrumb mb-3">
                             <ol className="breadcrumb breadcrumb--noColor">
-                                <li className="breadcrumb-item " > <Link to="/bill-entry" className="zzz">  <span className="material-icons">receipt</span>
+                                <li className="breadcrumb-item " > <Link to="" onClick={e => { this.backToBillEntry(e) }} className="zzz">  <span className="material-icons">receipt</span>
                                     <span>Lập đơn hàng</span>
                                 </Link>
                                 </li>

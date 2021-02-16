@@ -95,6 +95,11 @@ export class BillDelivery extends React.Component {
         this.props.history.replace({ ...history.location, state });
     }
 
+    backToBillEntry = (e) => {
+        e.preventDefault()
+        this.props.history.push('/bill-entry', { billEntryInfo: { ...this.state.form } })
+    }
+
 
     render() {
         return (
@@ -110,7 +115,7 @@ export class BillDelivery extends React.Component {
                         <nav aria-label="breadcrumb bill mb-3">
                             <ol className="breadcrumb breadcrumb--noColor">
                                 <li className="breadcrumb-item " >
-                                    <Link to="/bill-entry" className="zzz">  <span className="material-icons">receipt</span>
+                                    <Link to="" onClick={e => { this.backToBillEntry(e) }} className="zzz">  <span className="material-icons">receipt</span>
                                         <span>Lập đơn hàng</span>
                                     </Link>
                                 </li>

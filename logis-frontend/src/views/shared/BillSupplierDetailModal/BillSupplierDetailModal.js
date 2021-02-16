@@ -1,7 +1,7 @@
-import { render } from '@testing-library/react';
-import React, { useCallback } from 'react'
+import React from 'react'
 import { Modal } from 'react-bootstrap'
 import NumberFormat from 'react-number-format';
+import { DataOptions } from './../../../common'
 
 class BillSupplierDetailModal extends React.Component {
     constructor(props) {
@@ -35,7 +35,7 @@ class BillSupplierDetailModal extends React.Component {
         }
 
         if (!sup || sup && !sup.suggestionDetailDTOS) return (<></>)
-
+        console.log(sup)
         return (
             <>
                 <Modal
@@ -62,7 +62,7 @@ class BillSupplierDetailModal extends React.Component {
                                                     <h4 className="appTheme upc">{supItem.companyName}</h4>
                                                 </div>
                                                 <div className="supInfoContainer col-md-5 col-sm-12 txt-center">
-                                                    <span>Ngày lấy hàng dự kiến: </span>
+                                                    <span> Trạng thái: <span className="appTheme font-weight-bold">{DataOptions.getBillStatusNameByValue(supItem.status)}</span> </span>
                                                     <span>Thời gian vận chuyển: <span className="appTheme font-weight-bold">{supItem.transitTime} ngày</span></span>
                                                 </div>
                                                 <div className="supInfoContainer price-container col-md-4 col-sm-12 txt-center mb-2" >

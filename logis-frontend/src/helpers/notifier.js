@@ -26,7 +26,7 @@ export default class Notifier {
             text: message,
             icon: 'warning',
             showDenyButton: true,
-            confirmButtonText: `Xác nhận lưu`,
+            confirmButtonText: `Chấp nhận`,
             denyButtonText: `Hủy bỏ`,
         }).then((result) => {
             if (result.isConfirmed) {

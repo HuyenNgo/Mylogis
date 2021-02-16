@@ -9,21 +9,21 @@ const remoteApiUrl = 'http://104.45.196.189:9911'
 
 export const getAllProvinceProxy = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
     const fullUrl = remoteApiUrl + `/address/get-all-province`
-    axios.get(fullUrl)
+    return axios.get(fullUrl)
         .then(res => _handleResultStatus(res, successCallbackFn))
         .catch(error => _handleError(error, errorCallbackFn));
 }
 
 export const getAllDistrictProxy = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
     const fullUrl = remoteApiUrl + `/address/get-all-district`
-    axios.get(fullUrl)
+    return axios.get(fullUrl)
         .then(res => _handleResultStatus(res, successCallbackFn))
         .catch(error => _handleError(error, errorCallbackFn));
 }
 
 export const getAllWardProxy = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
     const fullUrl = remoteApiUrl + `/address/get-all-ward`
-    axios.get(fullUrl)
+    return axios.get(fullUrl)
         .then(res => _handleResultStatus(res, successCallbackFn))
         .catch(error => _handleError(error, errorCallbackFn));
 }
@@ -55,6 +55,13 @@ export const getAllOrderProxy = (queryObject, successCallbackFn = undefined, err
 
 export const updateOrderProxy = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
     const fullUrl = remoteApiUrl + `/trans/update-status-order?orderId=${queryObject.orderId}&rulrateId=${queryObject.rulrateId}&status=${queryObject.status}`
+    axios.get(fullUrl)
+        .then(res => _handleResultStatus(res, successCallbackFn))
+        .catch(error => _handleError(error, errorCallbackFn));
+}
+
+export const updateOrder2Proxy = (queryObject, successCallbackFn = undefined, errorCallbackFn = undefined) => {
+    const fullUrl = remoteApiUrl + `/trans/update-status-order?orderId=${queryObject.orderId}&status=${queryObject.status}`
     axios.get(fullUrl)
         .then(res => _handleResultStatus(res, successCallbackFn))
         .catch(error => _handleError(error, errorCallbackFn));

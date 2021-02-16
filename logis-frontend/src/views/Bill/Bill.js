@@ -1,23 +1,24 @@
 import React from 'react'
-import { Topbar, ToolbarButton } from './../../components'
 import Select from 'react-select'
 import DatePicker from "react-datepicker"
-import { StylessHelper, FormatHelper, DataOptions } from './../../common'
+import { FormatHelper, DataOptions } from './../../common'
 import Pagination from '@material-ui/lab/Pagination';
 import { PagingListModel } from './../../models'
 import { PagingHelper } from './../../helpers/pagingHelper'
-import { getAllOrderProxy, updateOrderProxy } from './../../api'
+import { getAllOrderProxy, updateOrderProxy, updateOrder2Proxy } from './../../api'
 import BillEditModal from './../shared/BillModal/BillEditModal'
 import notifier from './../../helpers/notifier'
+import { Constants } from './../../common/constants'
 import NumberFormat from 'react-number-format';
 
 export default class Bill extends React.Component {
     constructor(props) {
         super(props)
+        let d = new Date()
         this.state = {
             form: {
                 status: '',
-                fromDate: new Date(),
+                fromDate: new Date(d.setDate(d.getDate() - 30)),
                 toDate: new Date(),
             },
             orderList: [],
@@ -115,7 +116,6 @@ export default class Bill extends React.Component {
     }
 
     onBillItemClick = (item) => {
-        if (item.status == 4) return
         this.setState({
             editItem: item
         }, () => {
@@ -141,6 +141,27 @@ export default class Bill extends React.Component {
                     notifier.showErrorMessage("Cập nhật không thành công")
                 })
             }, 100)
+        })
+    }
+
+    onCompleteBill = (item) => {
+        let itemUpdate = item
+        itemUpdate.status = Constants.BillCompleted
+        notifier.showConfirmation("Xác nhận hoàn thành đơn hàng", () => {
+            notifier.showWaiting()
+            this.setShowModal(false)
+            const queryObj = itemUpdate
+            setTimeout(() => {
+                updateOrder2Proxy(queryObj, res => {
+                    notifier.hideWaiting()
+                    if (res.returnCode === 1) {
+                        this.reloadFetchData()
+                        notifier.showSuccessMessage("Cập nhật thành công")
+                        return
+                    }
+                    notifier.showErrorMessage("Cập nhật không thành công")
+                })
+            }, 100)
 
         })
     }
@@ -155,9 +176,9 @@ export default class Bill extends React.Component {
         return (
             <>
                 <div className="page-container" >
-                    <Topbar
+                    {/* <Topbar
                         title={'Nhập số điện thoại - Mã đơn hàng - Tên người nhận'}
-                    />
+                    /> */}
                     {/* <div className="toolbar-section botline-light ">
                     <div className="toolbar-section__horizon">
                         <div className="bg">
@@ -252,11 +273,14 @@ export default class Bill extends React.Component {
                                                         <td>{this.getDelliveryDate(item)}</td>
                                                         <td>{DataOptions.getBillStatusNameByValue(item.status)}</td>
                                                         <td>
-                                                            {/* <button className="btn btn-view"><i className="fa fa-eye "></i></button> */}
                                                             {
                                                                 this.state.editRule == "BYCOMPANY" ?
-                                                                    <button type="button" disabled={item.status == 4 ? true : false} onClick={this.onBillItemClick.bind(this, item)} className="btn btn-edit"><i className="fa fa-edit"></i></button> :
-                                                                    <button type="button" onClick={this.onBillItemClick.bind(this, item)} className="btn btn-view"><i className="fa fa-eye"></i></button>
+                                                                    <button type="button" onClick={this.onBillItemClick.bind(this, item)} className="btn btn-edit"><i className="fa fa-edit"></i></button> :
+                                                                    <div>
+                                                                        <button type="button" onClick={this.onBillItemClick.bind(this, item)} className="btn btn-view"><i className="fa fa-eye"></i></button>
+                                                                        {item.status === Constants.BillDelivered ? <button className="btn btn-success" onClick={this.onCompleteBill.bind(this, item)} >Đã nhận hàng</button> : <></>}
+                                                                    </div>
+
                                                             }
                                                         </td>
                                                     </tr>
