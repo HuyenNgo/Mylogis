@@ -62,6 +62,7 @@ class BillSupplierDetailModal extends React.Component {
                                                     <h4 className="appTheme upc">{supItem.companyName}</h4>
                                                 </div>
                                                 <div className="supInfoContainer col-md-5 col-sm-12 txt-center">
+                                                   <span> Mã vận đơn: <span className="appTheme font-weight-bold">{supItem.orderDetailCode}</span> </span>
                                                     <span> Trạng thái: <span className="appTheme font-weight-bold">{DataOptions.getBillStatusNameByValue(supItem.status)}</span> </span>
                                                     <span>Thời gian vận chuyển: <span className="appTheme font-weight-bold">{supItem.transitTime} ngày</span></span>
                                                 </div>

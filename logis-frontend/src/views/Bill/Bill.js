@@ -257,6 +257,8 @@ export default class Bill extends React.Component {
                                                 <th scope="col">STT</th>
                                                 <th scope="col">Mã đơn</th>
                                                 <th scope="col">Bên nhận</th>
+                                                <th scope="col">Loại hàng</th>
+                                                <th scope="col">Khối lượng</th>
                                                 <th scope="col">Tổng chi phí</th>
                                                 <th scope="col">Ngày giao</th>
                                                 <th scope="col">Trạng thái</th>
@@ -270,6 +272,8 @@ export default class Bill extends React.Component {
                                                         <th scope="row">{++index}</th>
                                                         <td>HD{item.orderId}</td>
                                                         <td>{item.receiverName}</td>
+                                                        <td>{item.typeProduct}</td>
+                                                        <td>{item.volumeProduction}{' (KG)'}</td>
                                                         <td>{<NumberFormat value={item.totalAmount} displayType={'text'} thousandSeparator={true} />}</td>
                                                         <td>{this.getDelliveryDate(item)}</td>
                                                         <td>{DataOptions.getBillStatusNameByValue(item.status)}</td>

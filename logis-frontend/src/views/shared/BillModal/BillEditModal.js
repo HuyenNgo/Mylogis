@@ -103,9 +103,11 @@ class BillEditModal extends React.Component {
                                                     <h4 className="appTheme upc">{orderDetailItem.companyName}</h4>
                                                 </div>
                                                 <div className={`supInfoContainer col-md-${editRule === "BYCOMPANY" ? 3 : 5} col-sm-12 txt-center`}>
+                                                 <span>Mã vận đơn: <span className="appTheme font-weight-bold">{orderDetailItem.orderDetailCode}</span> </span>
                                                     {editRule != "BYCOMPANY" ?
                                                         (<span> Trạng thái: <span className="appTheme font-weight-bold">{DataOptions.getBillStatusNameByValue(orderDetailItem.status)}</span> </span>)
                                                         : <></>}
+                                                    
                                                     <span>Thời gian vận chuyển: <span className="appTheme font-weight-bold">{orderDetailItem.transitTime} ngày</span></span>
                                                 </div>
                                                 <div className="supInfoContainer price-container col-md-4 col-sm-12 txt-center mb-2" >
