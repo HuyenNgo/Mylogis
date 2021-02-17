@@ -342,9 +342,6 @@ export class BillEntry extends React.Component {
                     })
             })
 
-        console.log('====================================');
-        console.log(this.props.location.state?.billEntryInfo)
-        console.log('====================================');
         await Promise.all([aTask, bTask, cTask]);
         notifier.hideWaiting()
 

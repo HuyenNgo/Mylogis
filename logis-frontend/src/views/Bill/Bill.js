@@ -51,8 +51,9 @@ export default class Bill extends React.Component {
         }
 
         getAllOrderProxy(queyObject, res => {
-            let data = res.data
-            console.log(data)
+            console.log(res)
+
+            let data = res.data ? res.data : []
             let fillData = []
             for (let orderItem of data) {
                 let newItem = {
