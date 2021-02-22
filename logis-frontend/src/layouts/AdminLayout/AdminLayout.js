@@ -6,7 +6,7 @@ import $ from 'jquery'
 export default class AdminLayout extends React.Component {
   constructor(props) {
     super(props)
-   
+
   }
 
   componentDidMount() {
@@ -14,7 +14,7 @@ export default class AdminLayout extends React.Component {
       this.props.children.props.history.push("/login")
     }
 
-    $("#adminContainer").css({ 'min-height': `${window.screen.height - 143}px` })
+    // $("#adminContainer").css({ 'min-height': `${window.screen.height - 143}px` })
   }
 
   render() {
@@ -25,8 +25,8 @@ export default class AdminLayout extends React.Component {
         <Sidebar {...this.props} />
         <div className="admin-container " id="adminContainer">
           {children}
-          <div className="footer">
-          </div>
+          {/* <div className="footer">
+          </div> */}
         </div>
       </div>
     )

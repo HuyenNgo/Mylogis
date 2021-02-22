@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker"
 import { FormatHelper, DataOptions } from './../../common'
 import Pagination from '@material-ui/lab/Pagination';
 import { PagingListModel } from './../../models'
+import { Topbar } from './../../components'
 import { PagingHelper } from './../../helpers/pagingHelper'
 import { getAllOrderProxy, updateOrderProxy, updateOrder2Proxy } from './../../api'
 import BillEditModal from './../shared/BillModal/BillEditModal'
@@ -51,8 +52,6 @@ export default class Bill extends React.Component {
         }
 
         getAllOrderProxy(queyObject, res => {
-            console.log(res)
-
             let data = res.data ? res.data : []
             let fillData = []
             for (let orderItem of data) {
@@ -110,6 +109,16 @@ export default class Bill extends React.Component {
 
         let model = PagingHelper.mapToPagingListModel([...fillData])
         this.setState({ pagingListModel: { ...model } });
+    }
+
+    handlePageChange = (event, value) => {
+        const { pageNumber } = this.state.pagingListModel
+        let gotoPage = value
+        if (gotoPage !== pageNumber) {
+            this.setState({
+                pagingListModel: { ...this.state.pagingListModel, pageNumber: gotoPage }
+            })
+        }
     }
 
     setShowModal = (value) => {
@@ -177,9 +186,11 @@ export default class Bill extends React.Component {
         return (
             <>
                 <div className="page-container" >
-                    {/* <Topbar
-                        title={'Nhập số điện thoại - Mã đơn hàng - Tên người nhận'}
-                    /> */}
+                    <Topbar
+                        title={'Quản lý đơn hàng'}
+                        isOnlyTitle={true}
+                        separateLine="light"
+                    />
                     {/* <div className="toolbar-section botline-light ">
                     <div className="toolbar-section__horizon">
                         <div className="bg">
@@ -257,8 +268,8 @@ export default class Bill extends React.Component {
                                                 <th scope="col">STT</th>
                                                 <th scope="col">Mã đơn</th>
                                                 <th scope="col">Bên nhận</th>
-                                                <th scope="col">Loại hàng</th>
-                                                <th scope="col">Khối lượng</th>
+                                                <th scope='col'>Loại hàng</th>
+                                                <th scope='col'>Khối lượng</th>
                                                 <th scope="col">Tổng chi phí</th>
                                                 <th scope="col">Ngày giao</th>
                                                 <th scope="col">Trạng thái</th>
@@ -266,34 +277,42 @@ export default class Bill extends React.Component {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {this.state.pagingListModel.data.map((item, index) => {
-                                                return (
-                                                    <tr key={index}>
-                                                        <th scope="row">{++index}</th>
-                                                        <td>HD{item.orderId}</td>
-                                                        <td>{item.receiverName}</td>
-                                                        <td>{item.typeProduct}</td>
-                                                        <td>{item.volumeProduction}{' (KG)'}</td>
-                                                        <td>{<NumberFormat value={item.totalAmount} displayType={'text'} thousandSeparator={true} />}</td>
-                                                        <td>{this.getDelliveryDate(item)}</td>
-                                                        <td>{DataOptions.getBillStatusNameByValue(item.status)}</td>
-                                                        <td>
-                                                            {
-                                                                this.state.editRule == "BYCOMPANY" ?
-                                                                    <button type="button" onClick={this.onBillItemClick.bind(this, item)} className="btn btn-edit"><i className="fa fa-edit"></i></button> :
-                                                                    <div>
-                                                                        <button type="button" onClick={this.onBillItemClick.bind(this, item)} className="btn btn-view"><i className="fa fa-eye"></i></button>
-                                                                        {item.status === Constants.BillDelivered ? <button className="btn btn-success" onClick={this.onCompleteBill.bind(this, item)} >Đã nhận hàng</button> : <></>}
-                                                                    </div>
+                                            {[...this.state.pagingListModel.data].slice(
+                                                PagingHelper.fromIndex(this.state.pagingListModel),
+                                                PagingHelper.toIndex(this.state.pagingListModel)).map((item, index) => {
+                                                    const currentIndex = PagingHelper.fromIndex(this.state.pagingListModel) + index + 1
+                                                    return (
+                                                        <tr key={index}>
+                                                            <th scope="row">{currentIndex}</th>
+                                                            <td>HD{item.orderId}</td>
+                                                            <td>{item.receiverName}</td>
+                                                            <td>{item.typeProduct}</td>
+                                                            <td>{item.volumeProduction} (KG)</td>
+                                                            <td>{<NumberFormat value={item.totalAmount} displayType={'text'} thousandSeparator={true} />}</td>
+                                                            <td>{this.getDelliveryDate(item)}</td>
+                                                            <td>
+                                                            
+                                                                    {/* this.state.editRule == "BYCOMPANY" ? DataOptions.getBillStatusNameByValue(item.orderItem.status): */}
+                                                                    
+                                                                   {DataOptions.getBillStatusNameByValue(item.status)}
+                                                            </td>
+                                                            <td>
+                                                                {
+                                                                    this.state.editRule == "BYCOMPANY" ?
+                                                                        <button type="button" onClick={this.onBillItemClick.bind(this, item)} className="btn btn-edit"><i className="fa fa-edit"></i></button> :
+                                                                        <div>
+                                                                            <button type="button" onClick={this.onBillItemClick.bind(this, item)} className="btn btn-view"><i className="fa fa-eye"></i></button>
+                                                                            {item.status === Constants.BillDelivered ? <button className="btn btn-success" onClick={this.onCompleteBill.bind(this, item)} >Đã nhận hàng</button> : <></>}
+                                                                        </div>
 
-                                                            }
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            })}
+                                                                }
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                })}
                                         </tbody>
                                     </table>
-                                    <Pagination count={this.state.pagingListModel.totalPage} shape="rounded" />
+                                    <Pagination count={this.state.pagingListModel.totalPage} shape="rounded" page={this.state.pagingListModel.pageNumber} onChange={this.handlePageChange} />
                                 </div>
                             }
                         </div>

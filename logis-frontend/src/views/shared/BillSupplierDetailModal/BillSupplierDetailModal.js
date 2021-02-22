@@ -58,11 +58,11 @@ class BillSupplierDetailModal extends React.Component {
                                             <div className="supItem-body">
                                                 <span className="supItemNo">{index}</span>
                                                 <div className="supInfoContainer col-md-2">
-                                                    <img className="supImg" src="https://cdn.nhanh.vn/cdn/store/26/artCT/22280/dich_vu_van_chuyen_ghn_express_1.png" alt="no-image"></img>
+                                                    {/* <img className="supImg" src="https://cdn.nhanh.vn/cdn/store/26/artCT/22280/dich_vu_van_chuyen_ghn_express_1.png" alt="no-image"></img> */}
                                                     <h4 className="appTheme upc">{supItem.companyName}</h4>
                                                 </div>
-                                                <div className="supInfoContainer col-md-5 col-sm-12 txt-center">
-                                                   <span> Mã vận đơn: <span className="appTheme font-weight-bold">{supItem.orderDetailCode}</span> </span>
+                                                <div className="supInfoContainer col-md-5 col-sm-12 txt-center">          
+                                                    <span>Mã vận chuyển: <span className="appTheme font-weight-bold">{supItem.orderDetailCode}</span></span>                                        
                                                     <span> Trạng thái: <span className="appTheme font-weight-bold">{DataOptions.getBillStatusNameByValue(supItem.status)}</span> </span>
                                                     <span>Thời gian vận chuyển: <span className="appTheme font-weight-bold">{supItem.transitTime} ngày</span></span>
                                                 </div>
@@ -80,7 +80,7 @@ class BillSupplierDetailModal extends React.Component {
                                                 </div>
                                                 <div className=" col-md-5 col-sm-12">
                                                     <div>
-                                                        <h5>{supItem?.startLocation?.locDescription} <i className="fa fa-arrow-right toModalWidth appTheme"></i> {supItem?.endLocation?.locDescription}</h5>
+                                                        <h5>{supItem?.startLocation?.locCode} <i className="fa fa-arrow-right toModalWidth appTheme"></i> {supItem?.endLocation?.locCode}</h5>
                                                     </div>
                                                 </div>
                                             </div>

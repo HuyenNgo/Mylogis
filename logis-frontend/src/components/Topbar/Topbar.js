@@ -35,7 +35,7 @@ const Topbar = (props) => {
     if (isOnlyTitle) {
       return (
         <div className="topbar-midtitle appTheme ">
-          <h3>{title}</h3>
+          <h5>{title}</h5>
         </div>
       )
     } else {
